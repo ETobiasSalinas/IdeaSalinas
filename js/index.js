@@ -1,106 +1,93 @@
-function comprar() {
-    let total = 0;
-    let precioRemera = 3000;
-    let tasaInteres = 0.05;
-    let remera = 3000;
-    let remeraComun = 0;
-    let remeraInteres = 0;
-    
-    let nombre = prompt('Ingresa tu nombre');
-    let estilo = prompt('Escriba CON o SIN estampa');
-    let cantidad = parseFloat(prompt('Ingrese cuántas va a llevar'));
-
-    if (!isNaN(cantidad) && cantidad > 0) {
-    } else {
-        alert('Ingrese un número válido');
-    }
-
-    remeraComun = parseFloat(cantidad) * remera;
-
-    if (estilo.toLowerCase() === 'con'){
-        remeraInteres = tasaInteres * remeraComun;
-       }
-       
-
-    console.log(nombre + ' compró ' + cantidad + ' remera/as ' + estilo + ' estampa. Su precio es de $'+remeraComun + ' + $' + remeraInteres);
-
-}
-
-comprar(); 
-
 let remeras = [
     {
-        remera: "simple",
-        color: "todos",
-        talle: "l al xl",
+        imagen: './img/remera-simple.png',
+        id: 1,
+        tipo: "Simple",
+        resumen: "Remera simple color Negro (Agregando una estampa te cobramos solo el 5% de interes)",
         precio: 2999.99
     },
     {
-        remera: "oversize",
-        color: "todos",
-        talle: "unico",
+        imagen: './img/remera-oversize.webp',
+        id: 2,
+        tipo: "Oversize",
+        resumen: "Remera oversize Mars",
         precio: 4999.99
     },
     {
-        remera: "estampado",
-        color: "todos",
-        talle: "l al xl",
+        imagen: './img/estampado.webp',
+        id: 3,
+        tipo: "Estampada",
+        resumen: "Remera con estampa a gusto",
         precio: 3499.99
     },
     {
-        remera: "termica",
-        color: "negro",
-        talle: "m al l",
+        imagen:'./img/830-negra.jpg',
+        id: 4,
+        tipo: "Termica",
+        resumen: "Remera termica color Negro",
         precio: 5999.99
     }
-]
+];
 
-for(let i=0; i<remeras.length; i++){
-    console.log(remeras[i])
+function mostrarRemeras() {
+    const remerasDiv = document.getElementById("remeras");
+    remeras.forEach(remera => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <img src="${remera.imagen}" alt="${remera.tipo}">
+            <h3>${remera.tipo}</h3>
+            <p>${remera.resumen}</p>
+            <p>Precio: $${remera.precio}</p>
+            <button onclick="agregarAlCarrito(${remera.id})">Comprar</button>
+        `;
+        remerasDiv.appendChild(div);
+    });
 }
 
-preciosRedondeados = remeras.map (precios => Math.ceil(precios.precio));
-console.log(preciosRedondeados)
+function agregarAlCarrito(id) {
+    const CARRITO = JSON.parse(localStorage.getItem('carrito')) || [];
+    const PRODUCTO = remeras.find(prod => prod.id === id);
+    const productoEnCarrito = CARRITO.find(prod => prod.id === id);
 
-let pantalones = [
-    {
-        pantalon: "jogin",
-        color: "gris, negro",
-        talle: "l al xl",
-        precio: 1500
-    },
-    {
-        pantalon: "jean",
-        color: "todos",
-        talle: "l al xl",
-        precio: 3000
-    },
-    {
-        pantalon: "cargo",
-        color: "sin stock",
-        talle: "sin stock",
-        precio: 2500
-    },
-]
+    if (productoEnCarrito) {
+        productoEnCarrito.cantidad += 1;
+    } else {
+        CARRITO.push({ ...PRODUCTO, cantidad: 1 }); 
+    }
 
-let prendasDeVestir = remeras.concat(pantalones)
-console.log(prendasDeVestir)
+    localStorage.setItem('carrito', JSON.stringify(CARRITO));
+    mostrarCarrito(); 
+}
 
-let totalRemeras = remeras.reduce((total, remera) => total + remera.precio, 0);
-let totalPantalones = pantalones.reduce((total, pantalon) => total + pantalon.precio, 0);
-let precioTotal = totalRemeras + totalPantalones;
-let precioTotalRedondeado = Math.ceil(precioTotal)
+function mostrarCarrito() {
+    const CARRITO = JSON.parse(localStorage.getItem('carrito')) || [];
+    const carritoList = document.getElementById('carrito');
+    carritoList.innerHTML = '';
+    let total = 0;
 
-console.log(`El precio total de las remeras es $${totalRemeras}`);
-console.log(`El precio total de los pantalones es $${totalPantalones}`);
-console.log(`El precio total de remeras y pantalones es $${precioTotalRedondeado}`);
+    CARRITO.forEach((remera, index) => {
+        let li = document.createElement('li');
+        li.textContent = `${remera.tipo} - Precio: ${remera.precio} - Cantidad: ${remera.cantidad}`;
+        li.innerHTML += `<button onclick="eliminarDelCarrito(${index})">Eliminar producto</button>`;
+        carritoList.appendChild(li);
+        total += remera.precio * remera.cantidad;
+    });
 
-  
-  
-  
+    total = Math.round(total);
+    document.getElementById('total').textContent = `Total: $${total}`; 
+}
 
+function eliminarDelCarrito(index) { 
+    const CARRITO = JSON.parse(localStorage.getItem('carrito')) || [];
+    CARRITO.splice(index, 1);
+    localStorage.setItem('carrito', JSON.stringify(CARRITO));
+    mostrarCarrito(); 
+}
 
-
+document.addEventListener('DOMContentLoaded', ()=>{
+    mostrarRemeras();
+    mostrarCarrito();
+});
 
 
 
